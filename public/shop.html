@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morandi Living - Shop</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">Morandi Living</h1>
+            <div class="nav-links">
+                <a href="/">首页</a>
+                <a href="/shop.html" class="active">商店</a>
+                <a href="#">关于我们</a>
+                <a href="#">联系我们</a>
+            </div>
+            <div class="cart-icon" id="cartIcon">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="cartCount">0</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 购物车弹窗 -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-content">
+            <div class="cart-header">
+                <h2>购物车</h2>
+                <button class="close-cart" id="closeCart">&times;</button>
+            </div>
+            <div class="cart-items" id="cartItems">
+                <!-- 购物车商品将在这里动态显示 -->
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    总计: <span id="cartTotal">¥0</span>
+                </div>
+                <button class="checkout-btn">结算</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="container">
+        <div class="products-grid">
+            <div class="product-card" data-id="1" data-price="2999">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&w=800&q=80" alt="简约餐桌">
+                </div>
+                <div class="product-info">
+                    <div class="category">家具</div>
+                    <h3 class="product-name">简约餐桌</h3>
+                    <div class="product-footer">
+                        <span class="price">¥2,999</span>
+                        <button class="add-to-cart">加入购物车</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card" data-id="2" data-price="4599">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800&q=80" alt="布艺沙发">
+                </div>
+                <div class="product-info">
+                    <div class="category">家具</div>
+                    <h3 class="product-name">布艺沙发</h3>
+                    <div class="product-footer">
+                        <span class="price">¥4,599</span>
+                        <button class="add-to-cart">加入购物车</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card" data-id="3" data-price="299">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=800&q=80" alt="陶瓷花瓶">
+                </div>
+                <div class="product-info">
+                    <div class="category">装饰</div>
+                    <h3 class="product-name">陶瓷花瓶</h3>
+                    <div class="product-footer">
+                        <span class="price">¥299</span>
+                        <button class="add-to-cart">加入购物车</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card" data-id="4" data-price="599">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80" alt="床上四件套">
+                </div>
+                <div class="product-info">
+                    <div class="category">床品</div>
+                    <h3 class="product-name">床上四件套</h3>
+                    <div class="product-footer">
+                        <span class="price">¥599</span>
+                        <button class="add-to-cart">加入购物车</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card" data-id="5" data-price="799">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80" alt="落地灯">
+                </div>
+                <div class="product-info">
+                    <div class="category">照明</div>
+                    <h3 class="product-name">落地灯</h3>
+                    <div class="product-footer">
+                        <span class="price">¥799</span>
+                        <button class="add-to-cart">加入购物车</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card" data-id="6" data-price="1299">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1558997519-83c9716c8fce?auto=format&fit=crop&w=800&q=80" alt="收纳柜">
+                </div>
+                <div class="product-info">
+                    <div class="category">收纳</div>
+                    <h3 class="product-name">收纳柜</h3>
+                    <div class="product-footer">
+                        <span class="price">¥1,299</span>
+                        <button class="add-to-cart">加入购物车</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="cart.js"></script>
+</body>
+</html>
