@@ -2,6 +2,8 @@
   "name": "comp7780_GroupProject",
   "version": "1.0.0",
   "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
     "mysql": "^2.18.1"
   }
 }
