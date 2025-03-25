@@ -127,12 +127,12 @@ app.post('/api/checkout', (req, res) => {
     pool.query('SELECT cust_credit_limit FROM customer WHERE cust_username = ?', [username], (err, results) => {
         if (err) {
             console.error('Error fetching customer credit limit:', err);
-            res.status(500).json({ success: false, message: 'Internal Server Error' });
+            res.status(500).json({success: false, message: 'Internal Server Error'});
             return;
         }
 
         if (results.length === 0) {
-            res.status(404).json({ success: false, message: 'Customer not found' });
+            res.status(404).json({success: false, message: 'Customer not found'});
             return;
         }
 
@@ -146,7 +146,7 @@ app.post('/api/checkout', (req, res) => {
         }
 
         if (creditLimit < totalCost) {
-            res.status(400).json({ success: false, message: 'Insufficient credit limit' });
+            res.status(400).json({success: false, message: 'Insufficient credit limit'});
             return;
         }
 
@@ -168,11 +168,11 @@ app.post('/api/checkout', (req, res) => {
 
                 Promise.all(productUpdates)
                     .then(() => {
-                        res.json({ success: true, message: 'Checkout successful' });
+                        res.json({success: true, message: 'Checkout successful'});
                     })
                     .catch(err => {
                         console.error('Error processing product updates:', err);
-                        res.status(500).json({ success: false, message: 'Internal Server Error' });
+                        res.status(500).json({success: false, message: 'Internal Server Error'});
                     });
             });
         });
@@ -194,7 +194,7 @@ app.get('/api/getOrders', (req, res) => {
         (err, results) => {
             if (err) {
                 console.error('Error fetching orders:', err);
-                res.status(500).json({ success: false, message: 'Internal Server Error' });
+                res.status(500).json({success: false, message: 'Internal Server Error'});
                 return;
             }
 
@@ -376,14 +376,14 @@ app.delete('/api/deleteOrder', (req, res) => {
     pool.getConnection((err, connection) => {
         if (err) {
             console.error('Error getting database connection:', err);
-            res.status(500).json({ success: false, message: 'Internal Server Error' });
+            res.status(500).json({success: false, message: 'Internal Server Error'});
             return;
         }
 
         connection.beginTransaction((err) => {
             if (err) {
                 console.error('Error starting transaction:', err);
-                res.status(500).json({ success: false, message: 'Internal Server Error' });
+                res.status(500).json({success: false, message: 'Internal Server Error'});
                 connection.release();
                 return;
             }
@@ -393,7 +393,7 @@ app.delete('/api/deleteOrder', (req, res) => {
                 if (err) {
                     connection.rollback(() => {
                         console.error('Error checking order ownership:', err);
-                        res.status(500).json({ success: false, message: 'Internal Server Error' });
+                        res.status(500).json({success: false, message: 'Internal Server Error'});
                     });
                     connection.release();
                     return;
@@ -401,7 +401,7 @@ app.delete('/api/deleteOrder', (req, res) => {
 
                 if (results.length === 0) {
                     connection.rollback(() => {
-                        res.status(404).json({ success: false, message: 'Order not found or does not belong to you' });
+                        res.status(404).json({success: false, message: 'Order not found or does not belong to you'});
                     });
                     connection.release();
                     return;
@@ -412,7 +412,7 @@ app.delete('/api/deleteOrder', (req, res) => {
                     if (err) {
                         connection.rollback(() => {
                             console.error('Error deleting order details:', err);
-                            res.status(500).json({ success: false, message: 'Internal Server Error' });
+                            res.status(500).json({success: false, message: 'Internal Server Error'});
                         });
                         connection.release();
                         return;
@@ -423,7 +423,7 @@ app.delete('/api/deleteOrder', (req, res) => {
                         if (err) {
                             connection.rollback(() => {
                                 console.error('Error deleting sale order:', err);
-                                res.status(500).json({ success: false, message: 'Internal Server Error' });
+                                res.status(500).json({success: false, message: 'Internal Server Error'});
                             });
                             connection.release();
                             return;
@@ -433,13 +433,13 @@ app.delete('/api/deleteOrder', (req, res) => {
                             if (err) {
                                 connection.rollback(() => {
                                     console.error('Error committing transaction:', err);
-                                    res.status(500).json({ success: false, message: 'Internal Server Error' });
+                                    res.status(500).json({success: false, message: 'Internal Server Error'});
                                 });
                                 connection.release();
                                 return;
                             }
 
-                            res.json({ success: true, message: 'Order deleted successfully' });
+                            res.json({success: true, message: 'Order deleted successfully'});
                             connection.release();
                         });
                     });
@@ -449,6 +449,127 @@ app.delete('/api/deleteOrder', (req, res) => {
     });
 })
 
+// 登录接口
+app.post('/api/supplier/login', (req, res) => {
+    const supplierEmail = req.body.email;
+    const password = req.body.password;
+
+    pool.query('SELECT * FROM supplier WHERE supplier_email = ? AND supplier_password = ?', [supplierEmail, password], (err, results) => {
+        if (err) {
+            console.error('Error during login:', err);
+            res.status(500).json({success: false, message: 'Internal Server Error'});
+            return;
+        }
+
+        if (results.length === 0) {
+            res.json({success: false, message: 'Invalid email or password'});
+            return;
+        }
+
+        res.json({success: true, message: 'Login successful', supplier: results[0]});
+    });
+});
+
+// 商品管理接口
+app.get('/api/supplier/products', (req, res) => {
+    const supplierId = req.query.supplier_id;
+    pool.query('SELECT * FROM product WHERE supplier_id = ?', [supplierId], (err, results) => {
+        if (err) {
+            console.error('Error fetching products:', err);
+            res.status(500).json({success: false, message: 'Internal Server Error'});
+            return;
+        }
+        res.json(results);
+    });
+});
+
+app.post('/api/supplier/products', (req, res) => {
+    const {supplier_id, prod_desc, prod_on_hand, prod_price, prod_imgurl, prod_category} = req.body;
+    pool.query(
+        'INSERT INTO product (supplier_id, prod_desc, prod_on_hand, prod_price, prod_imgurl, prod_category) VALUES (?, ?, ?, ?, ?, ?)',
+        [supplier_id, prod_desc, prod_on_hand, prod_price, prod_imgurl, prod_category],
+        (err, results) => {
+            if (err) {
+                console.error('Error adding product:', err);
+                res.status(500).json({success: false, message: 'Internal Server Error'});
+                return;
+            }
+            res.json({success: true, message: 'Product added successfully'});
+        }
+    );
+});
+
+app.get('/api/supplier/products/:prod_id', (req, res) => {
+    const productId = req.params.prod_id;
+    pool.query('SELECT * FROM product WHERE prod_id = ?', [productId], (err, results) => {
+        if (err) {
+            console.error('Error fetching product:', err);
+            res.status(500).json({success: false, message: 'Internal Server Error'});
+            return;
+        }
+        if (results.length === 0) {
+            res.json({success: false, message: 'Product not found'});
+            return;
+        }
+        res.json({success: true, product: results[0]});
+    });
+});
+
+app.put('/api/supplier/products/:prod_id', (req, res) => {
+    const productId = req.params.prod_id;
+    const {prod_desc, prod_on_hand, prod_price, prod_imgurl, prod_category, supplier_id} = req.body;
+    pool.query(
+        'UPDATE product SET prod_desc = ?, prod_on_hand = ?, prod_price = ?, prod_imgurl = ?, prod_category = ?, supplier_id = ? WHERE prod_id = ?',
+        [prod_desc, prod_on_hand, prod_price, prod_imgurl, prod_category, supplier_id, productId],
+        (err, results) => {
+            if (err) {
+                console.error('Error updating product:', err);
+                res.status(500).json({success: false, message: 'Internal Server Error'});
+                return;
+            }
+            res.json({success: true, message: 'Product updated successfully'});
+        }
+    );
+});
+
+app.delete('/api/supplier/products/:prod_id', (req, res) => {
+    const productId = req.params.prod_id;
+    pool.query('DELETE FROM product WHERE prod_id = ?', [productId], (err, results) => {
+        if (err) {
+            console.error('Error deleting product:', err);
+            res.status(500).json({success: false, message: 'Internal Server Error'});
+            return;
+        }
+        res.json({success: true, message: 'Product deleted successfully'});
+    });
+});
+
+// 订单管理接口
+app.get('/api/supplier/orders', (req, res) => {
+    const supplierId = req.query.supplier_id;
+    pool.query(
+        `SELECT so.order_id,
+                so.cust_username,
+                so.order_date,
+                p.prod_desc,
+                od.qty,
+                od.price AS amount,
+                'Completed' AS status
+         FROM sales_order so
+                  JOIN order_detail od ON so.order_id = od.order_id
+                  JOIN product p ON od.prod_id = p.prod_id
+         WHERE p.supplier_id = ?`,
+        [supplierId],
+        (err, results) => {
+            if (err) {
+                console.error('Error fetching orders:', err);
+                res.status(500).json({success: false, message: 'Internal Server Error'});
+                return;
+            }
+            res.json(results);
+        }
+    );
+});
 
 // 添加一个简单的首页路由
 app.get('/', (req, res) => {

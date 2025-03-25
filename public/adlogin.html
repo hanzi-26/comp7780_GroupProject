@@ -11,7 +11,7 @@
             box-sizing: border-box;
             font-family: 'Microsoft Yahei', sans-serif;
         }
-	       .logo-container {
+        .logo-container {
             text-align: center;
             margin-bottom: 25px;
         }
@@ -102,16 +102,17 @@
             transform: translateY(-2px);
         }
 
-
         .register-link {
             margin-top: 20px;
             text-align: center;
         }
+
         .register-link a {
             color: #fff;
             text-decoration: none;
             transition: color 0.3s;
         }
+
         .register-link a:hover {
             color: rgba(255, 255, 255, 0.8);
         }
@@ -126,12 +127,12 @@
 <body>
 <div class="login-box">
     <div class="logo-container">
-          <img src="logo.jpg" class="logo" alt="Furniture Logo">
+        <img src="logo.jpg" class="logo" alt="Furniture Logo">
     </div>
     <h2>Admin Login</h2>
     <form id="loginForm">
         <div class="input-group">
-            <input type="email" id="username" placeholder="Supplier email" required>
+            <input type="email" id="email" placeholder="Supplier email" required>
         </div>
         <div class="input-group">
             <input type="password" id="password" placeholder="Password" required>
@@ -146,35 +147,36 @@
         const loginForm = document.getElementById('loginForm');
         const errorMessage = document.getElementById('errorMessage');
 
-
+        // 检查是否已经登录
         if (localStorage.getItem('isLoggedIn') === 'true') {
             window.location.href = 'shop.html';
         }
 
-
+        // 登录表单提交事件
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-
-            fetch('http://localhost:3000/api/login', {
+            // 调用后端的登录API
+            fetch('http://localhost:3000/api/supplier/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ email, password }),
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-
+                        // 保存登录状态和用户信息
                         localStorage.setItem('isLoggedIn', 'true');
-                        localStorage.setItem('username', data.user.cust_username);
-                        localStorage.setItem('name', data.user.cust_name);
+                        localStorage.setItem('supplierId', data.supplier.supplier_id);
+                        localStorage.setItem('supplierName', data.supplier.supplier_name);
 
-                        window.location.href = 'shop.html';
+                        // 跳转到商品管理页面
+                        window.location.href = 'admin.html';
                     } else {
                         errorMessage.textContent = data.message;
                         errorMessage.style.display = 'block';
