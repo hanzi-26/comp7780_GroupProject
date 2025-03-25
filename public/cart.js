@@ -122,3 +122,47 @@ function updateCart() {
         </div>
     `).join('');
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const checkoutButton = document.getElementById('checkoutButton');
+    // checkout按钮点击事件
+    checkoutButton.addEventListener('click', () => {
+        // 获取购物车中的商品信息
+        const cartItems = cart.map(item => ({
+            product_id: item.id,
+            quantity: item.quantity,
+            price: item.price
+        }));
+
+        console.log("cart", cartItems)
+
+        // 获取当前用户信息
+        const username = localStorage.getItem('username');
+
+        // 调用后端的checkout API
+        fetch('http://localhost:3000/api/checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username,
+                cartItems
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 清空购物车
+                    cart = [];
+                    updateCart();
+                    alert('Checkout successful!');
+                } else {
+                    alert('Checkout failed: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error during checkout:', error);
+                alert('Error during checkout. Check the console.');
+            });
+    });
+});

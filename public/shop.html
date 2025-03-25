@@ -7,48 +7,120 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-    <nav class="navbar">
-        <div class="container">
-            <h1 class="logo">Morandi Living</h1>
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="shop.html" class="active">Shop</a>
-                <a href="index.html">About Us</a>
-                <a href="index.html">Contact Us</a>
-            </div>
-            <div class="cart-icon" id="cartIcon">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="cart-count" id="cartCount">0</span>
-            </div>
-        </div>
-    </nav>
+<style>
+    .nav-links a {
+        color: #333;
+        text-decoration: none;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        margin-right: 15px;
+        transition: color 0.3s ease;
+    }
 
-    <!-- Cart modal -->
-    <div class="cart-modal" id="cartModal">
-        <div class="cart-content">
-            <div class="cart-header">
-                <h2>Shopping Cart</h2>
-                <button class="close-cart" id="closeCart">&times;</button>
+    .nav-links a:hover {
+        color: #888;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+    }
+
+    .search-box input[type="text"] {
+        padding: 8px;
+        border: none;
+        border-radius: 4px 0 0 4px;
+        outline: none;
+    }
+
+    .search-box button {
+        padding: 8px 12px;
+        background-color: #333;
+        color: white;
+        border: none;
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+    }
+</style>
+<body>
+<nav class="navbar">
+    <div class="container">
+        <h1 class="logo">Morandi Living</h1>
+        <div class="nav-links">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search...">
+                <button id="searchButton"><i class="fas fa-search"></i></button>
             </div>
-            <div class="cart-items" id="cartItems">
-                <!-- Cart items will be dynamically displayed here -->
-            </div>
-            <div class="cart-footer">
-                <div class="cart-total">
-                    Total: <span id="cartTotal">$0</span>
-                </div>
-                <button class="checkout-btn">Checkout</button>
-            </div>
+            <a href="index.html">Home</a>
+            <a href="shop.html" class="active">Shop</a>
+            <a href="index.html">About Us</a>
+            <a href="index.html">Contact Us</a>
+            <a href="purchase.html">My Purchase</a>
+        </div>
+        <!-- 退出登录按钮 -->
+        <button id="logoutButton" class="logout-button">Logout</button>
+        <div class="cart-icon" id="cartIcon">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count" id="cartCount">0</span>
         </div>
     </div>
+</nav>
 
-    <main class="container">
-        <div class="products-grid" id="productsContainer">
+<!-- Cart modal -->
+<div class="cart-modal" id="cartModal">
+    <div class="cart-content">
+        <div class="cart-header">
+            <h2>Shopping Cart</h2>
+            <button class="close-cart" id="closeCart">&times;</button>
         </div>
-        <script src="shop.js"></script>
-    </main>
+        <div class="cart-items" id="cartItems">
+            <!-- Cart items will be dynamically displayed here -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                Total: <span id="cartTotal">$0</span>
+            </div>
+            <button id="checkoutButton" class="checkout-btn">Checkout</button>
+        </div>
+    </div>
+</div>
 
-    <script src="cart.js"></script>
+<main class="container">
+    <div class="products-grid" id="productsContainer">
+    </div>
+    <script src="shop.js"></script>
+</main>
+
+<script src="cart.js"></script>
+<script>
+   document.addEventListener('DOMContentLoaded', () => {
+        // 检查是否已经登录
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            // 如果没有登录，重定向到登录页面
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // 如果已经登录，可以在这里显示用户信息
+        const username = localStorage.getItem('username');
+        const name = localStorage.getItem('name');
+        console.log(`当前登录用户: ${name} (${username})`);
+
+        // 获取商品列表
+        const productContainer = document.getElementById('productsContainer');
+        fetchProducts(productContainer);
+        const logoutButton = document.getElementById('logoutButton')
+       // 退出登录按钮点击事件
+       logoutButton.addEventListener('click', () => {
+           // 清除登录状态和用户信息
+           localStorage.removeItem('isLoggedIn');
+           localStorage.removeItem('username');
+           localStorage.removeItem('name');
+           // 跳转到登录页面
+           window.location.href = 'login.html';
+       });
+    });
+
+</script>
 </body>
 </html>

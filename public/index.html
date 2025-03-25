@@ -6,104 +6,146 @@
     <title>Morandi Living - Home</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .nav-links a {
+            color: #333;
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            margin-right: 15px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #888;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box input[type="text"] {
+            padding: 8px;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            outline: none;
+        }
+
+        .search-box button {
+            padding: 8px 12px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body class="home-page">
-    <nav class="navbar">
-        <div class="container">
-            <h1 class="logo">Morandi Living</h1>
-            <div class="nav-links">
-                <a href="index.html" class="active">Home</a>
-                <a href="shop.html">Shop</a>
-                <a href="#">About Us</a>
-                <a href="#">Contact Us</a>
-            </div>
+<nav class="navbar">
+    <div class="container">
+        <h1 class="logo">Morandi Living</h1>
+        <div class="nav-links">
+
+<!--            <div class="search-box">
+                <input type="text" placeholder="Search...">
+                <button><i class="fas fa-search"></i></button>
+            </div>-->
+            <a href="index.html" class="active">Home</a>
+            <a href="shop.html">Shop</a>
+            <a href="#">About Us</a>
+            <a href="login.html">Login</a>
+            <a href="purchase.html">My Purchase</a>
+
         </div>
-    </nav>
+    </div>
+</nav>
 
-    <section class="title-section container">
-        <h2>COMP7780 Special Topics in Knowledge and Information Management</h2>
-        <h3>Team no.14 Name: BUers</h3>
-    </section>
+<section class="title-section container">
+    <h2>COMP7780 Special Topics in Knowledge and Information Management</h2>
+    <h3>Team no.14 Name: BUers</h3>
+</section>
 
-    <main>
-        <!-- Main banner -->
-        <section class="hero">
-            <div class="hero-content">
-                <h1>Simple Living, Quality Choice</h1>
-                <p>Explore Morandi color scheme home furnishings and create a warm and elegant living space</p>
-                <a href="shop.html" class="cta-button">Shop Now</a>
-            </div>
-        </section>
-
-        <!-- Featured categories -->
-        <section class="featured-categories container">
-            <div class="category-grid">
-                <a href="shop.html" class="category-card furniture">
-                    <div class="category-content">
-                        <h3>Furniture Collection</h3>
-                        <p>Simple and modern, comfortable and elegant</p>
-                    </div>
-                </a>
-                <a href="shop.html" class="category-card decor">
-                    <div class="category-content">
-                        <h3>Decorative Art</h3>
-                        <p>Embellish life and create atmosphere</p>
-                    </div>
-                </a>
-                <a href="shop.html" class="category-card lighting">
-                    <div class="category-content">
-                        <h3>Lighting Fixtures</h3>
-                        <p>Warm light, create mood</p>
-                    </div>
-                </a>
-            </div>
-        </section>
-
-        <!-- New arrivals -->
-        <section class="new-arrival">
-            <div class="container">
-                <h2>New Arrivals</h2>
-                <div class="product-showcase">
-                    <div class="showcase-content">
-                        <h3>Morandi Color Scheme Sofa</h3>
-                        <p>Brand new design, breakthrough comfort experience</p>
-                        <a href="shop.html" class="learn-more">Learn More</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <section class="contact-us container">
-        <h2>Contact Us</h2>
-        <div class="table-container" id="dataContainer">
+<main>
+    <!-- Main banner -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Simple Living, Quality Choice</h1>
+            <p>Explore Morandi color scheme home furnishings and create a warm and elegant living space</p>
+            <a href="shop.html" class="cta-button">Shop Now</a>
         </div>
     </section>
 
-    <footer>
+    <!-- Featured categories -->
+    <section class="featured-categories container">
+        <div class="category-grid">
+            <a href="shop.html" class="category-card furniture">
+                <div class="category-content">
+                    <h3>Furniture Collection</h3>
+                    <p>Simple and modern, comfortable and elegant</p>
+                </div>
+            </a>
+            <a href="shop.html" class="category-card decor">
+                <div class="category-content">
+                    <h3>Decorative Art</h3>
+                    <p>Embellish life and create atmosphere</p>
+                </div>
+            </a>
+            <a href="shop.html" class="category-card lighting">
+                <div class="category-content">
+                    <h3>Lighting Fixtures</h3>
+                    <p>Warm light, create mood</p>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- New arrivals -->
+    <section class="new-arrival">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>About Us</h4>
-                    <p>Morandi Living is committed to providing you with high-quality home products, making every home full of warmth and artistic atmosphere.</p>
+            <h2>New Arrivals</h2>
+            <div class="product-showcase">
+                <div class="showcase-content">
+                    <h3>Morandi Color Scheme Sofa</h3>
+                    <p>Brand new design, breakthrough comfort experience</p>
+                    <a href="shop.html" class="learn-more">Learn More</a>
                 </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="shop.html">Shop</a></li>
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="#">Contact Us</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 COMP7780. All rights reserved.</p>
-                <button id="fetchDataButton">Fetch Data</button>
-                <!--<div id="dataContainer"></div>-->
-                <!-- 引入前端脚本 -->
-                <script src="client.js"></script>
             </div>
         </div>
-    </footer>
+    </section>
+</main>
+
+<section class="contact-us container">
+    <h2>Contact Us</h2>
+    <div class="table-container" id="dataContainer">
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>About Us</h4>
+                <p>Morandi Living is committed to providing you with high-quality home products, making every home full of warmth and artistic atmosphere.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="shop.html">Shop</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 COMP7780. All rights reserved.</p>
+            <button id="fetchDataButton">Fetch Data</button>
+            <!--<div id="dataContainer"></div>-->
+            <!-- 引入前端脚本 -->
+            <script src="client.js"></script>
+        </div>
+    </div>
+</footer>
 </body>
 </html>
