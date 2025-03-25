@@ -7,6 +7,35 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        .navbar .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        }
+
+        .brand-logo {
+            height: 40px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .brand-logo:hover {
+            transform: rotate(-5deg) scale(1.05);
+        }
+
+
+        .logo {
+            font-size: 24px;
+            letter-spacing: 1.5px;
+            position: relative;
+            top: 2px;
+        }
+
+        .navbar .container {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
         .nav-links a {
             color: #333;
             text-decoration: none;
@@ -45,7 +74,10 @@
 <body class="home-page">
 <nav class="navbar">
     <div class="container">
-        <h1 class="logo">Morandi Living</h1>
+      <div class="logo-container">
+           <img src="logo2.png" class="brand-logo" alt="Morandi Living Logo">
+           <h1 class="logo">Morandi Living</h1>
+       </div>
         <div class="nav-links">
 
 <!--            <div class="search-box">
@@ -142,7 +174,7 @@
             <p>&copy; 2025 COMP7780. All rights reserved.</p>
             <button id="fetchDataButton">Fetch Data</button>
             <!--<div id="dataContainer"></div>-->
-            <!-- 引入前端脚本 -->
+            <!-- 瀵�鏇炲弳閸撳秶锟斤拷閼存碍婀� -->
             <script src="client.js"></script>
         </div>
     </div>
