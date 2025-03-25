@@ -102,7 +102,7 @@
             transform: translateY(-2px);
         }
 
-        
+
         .register-link {
             margin-top: 20px;
             text-align: center;
@@ -138,9 +138,12 @@
         </div>
         <button type="submit">Login</button>
     </form>
-   
+
     <div class="register-link">
         <a href="register.html">Register</a>
+    </div>
+    <div class="register-link">
+        <a href="adlogin.html">Admin</a>
     </div>
     <p id="errorMessage" style="color: red; text-align: center; margin-top: 10px; display: none;"></p>
 </div>
@@ -150,19 +153,19 @@
         const loginForm = document.getElementById('loginForm');
         const errorMessage = document.getElementById('errorMessage');
 
-        // 妫�鏌ユ槸鍚﹀凡缁忕櫥褰�
+
         if (localStorage.getItem('isLoggedIn') === 'true') {
             window.location.href = 'shop.html';
         }
 
-        // 鐧诲綍琛ㄥ崟鎻愪氦浜嬩欢
+
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            
+
             fetch('http://localhost:3000/api/login', {
                 method: 'POST',
                 headers: {
@@ -173,11 +176,11 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        
+
                         localStorage.setItem('isLoggedIn', 'true');
                         localStorage.setItem('username', data.user.cust_username);
                         localStorage.setItem('name', data.user.cust_name);
-                        
+
                         window.location.href = 'shop.html';
                     } else {
                         errorMessage.textContent = data.message;
