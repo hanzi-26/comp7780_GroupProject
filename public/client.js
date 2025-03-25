@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const fetchDataFromBackend = () => {
-    fetch('http://localhost:3000/api/fetchUsers')
+    fetch('http://localhost:3000/api/fetchProducts')
         .then(response => response.json())
         .then(data => {
             console.log('Data from database:', data);
@@ -47,9 +47,9 @@ const displayData = (data, container) => {
         <table border="1">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
+                    <th>Team member name</th>
+                    <th>Student ID</th>
+                    <th>Job Title</th>
                     <!-- 根据你的数据结构调整表头 -->
                 </tr>
             </thead>
@@ -58,9 +58,9 @@ const displayData = (data, container) => {
         .map(
             (item) => `
                             <tr>
-                                <td>${item.empl_id}</td>
                                 <td>${item.empl_name}</td>
-                                <td>${item.empl_email}</td>
+                                <td>${item.empl_stuID}</td>
+                                <td>${item.empl_job}</td>
                                 <!-- 根据你的数据结构调整表格内容 -->
                             </tr>
                         `

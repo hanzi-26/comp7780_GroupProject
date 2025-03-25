@@ -1,24 +1,3 @@
-// import express from 'express';
-// import { fileURLToPath } from 'url';
-// import { dirname, join } from 'path';
-//
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = dirname(__filename);
-//
-// const app = express();
-// const port = 4000;
-//
-// // define picture, css and image floders
-// app.use(express.static('public'));
-//
-// app.get('/', (req, res) => {
-//   res.sendFile(join(__dirname, 'public', 'index.html'));
-// });
-//
-// app.listen(port, () => {
-//   console.log(`Server running at http://localhost:${port}`);
-// });
-
 const express = require('express');
 const mysql = require('mysql');
 const cors = require('cors');
@@ -75,6 +54,19 @@ const fetchUsers = (callback) => {
   });
 };
 
+// 查询商品
+const fetchProducts = (callback) => {
+  pool.query('SELECT * FROM product', (err, results) => {
+    if (err) {
+      console.error('Error fetching products:', err);
+      callback(err);
+      return;
+    }
+    console.log('products:', results);
+    callback(null, results);
+  });
+};
+
 // 更新数据
 const updateUser = (id, name, email, callback) => {
   const sql = 'UPDATE users SET name = ?, email = ? WHERE id = ?';
@@ -106,6 +98,16 @@ const deleteUser = (id, callback) => {
 // 定义一个 API 路由，用于获取数据库数据
 app.get('/api/fetchUsers', (req, res) => {
   fetchUsers((err, data) => {
+    if (err) {
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+    res.json(data);
+  });
+});
+
+app.get('/api/fetchProducts', (req, res) => {
+  fetchProducts((err, data) => {
     if (err) {
       res.status(500).json({ error: 'Internal Server Error' });
       return;

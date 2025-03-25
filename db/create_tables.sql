@@ -13,7 +13,9 @@ empl_name VARCHAR(20) NOT NULL,
 empl_email VARCHAR(20) NOT NULL,
 empl_phone VARCHAR(12),
 empl_hire_date DATE,
-empl_salary FLOAT NOT NULL
+empl_salary FLOAT NOT NULL,
+empl_job VARCHAR(50),
+empl_stuID INT NOT NULL
 );
 
 DESC employee;
@@ -128,3 +130,12 @@ supplier_id INT NOT NULL
 ### 
 #################################
 
+ALTER TABLE employee
+ADD COLUMN empl_job VARCHAR(50);
+SELECT * FROM employee;
+INSERT INTO employee VALUES (NULL, 'Huanhua LIN', 'empl4@abc.com', '415-323-4567', '2020-01-01', 5000, 'Senior Scrum Master', 24464309);
+INSERT INTO employee VALUES (NULL, 'Yi HUANG', 'empl5@abc.com', '415-423-4567', '2020-03-01', 5000, 'Scrum Master', 24429228);
+INSERT INTO employee VALUES (NULL, 'Dongping QIAN', 'empl6@abc.com', '415-363-4567', '2021-01-01', 5000, 'Project Manger', 24435112);
+INSERT INTO employee VALUES (NULL, 'Han LI', 'empl1@abc.com', '415-123-4567', '2020-01-01', 5000, 'Developer', 24466778);
+INSERT INTO employee VALUES (NULL, 'Yifan LI', 'empl2@abc.com', '415-234-5678', '2020-06-01', 5000, 'Developer', 24464295);
+INSERT INTO employee VALUES (NULL, 'SHiwei DENG', 'empl3@abc.com', '415-345-6789', '2021-02-01', 5000, 'Developer', 24448028);
