@@ -12,6 +12,20 @@
             box-sizing: border-box;
             font-family: 'Microsoft Yahei', sans-serif;
         }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .logo {
+            width: 180px;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        
+        h2 {
+            margin-top: -10px;
+            margin-bottom: 25px;
+        }
 
         body {
             min-height: 100vh;
@@ -99,6 +113,9 @@
 </head>
 <body class="home-page">
 <div class="login-box">
+    <div class="logo-container">
+          <img src="logo.jpg" class="logo" alt="Furniture Logo">
+     </div>
     <h2>Register</h2>
     <form id="registerForm">
         <div class="input-group">
@@ -129,7 +146,7 @@
         const registerForm = document.getElementById('registerForm');
         const errorMessage = document.getElementById('errorMessage');
 
-        // 注册表单提交事件
+       
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -140,14 +157,14 @@
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
 
-            // 验证密码是否匹配
+           
             if (password !== confirmPassword) {
                 errorMessage.textContent = 'Passwords do not match';
                 errorMessage.style.display = 'block';
                 return;
             }
 
-            // 调用后端的注册API
+            
             fetch('http://localhost:3000/api/register', {
                 method: 'POST',
                 headers: {
@@ -158,7 +175,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // 注册成功，跳转到登录页面
+                        
                         window.location.href = 'login.html';
                     } else {
                         errorMessage.textContent = data.message;
