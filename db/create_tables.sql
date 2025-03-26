@@ -57,7 +57,7 @@ DROP TABLE product;
 
 CREATE TABLE product (
 prod_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-prod_desc VARCHAR(20) NOT NULL,
+prod_desc VARCHAR(255) NOT NULL,
 prod_on_hand INT NOT NULL,
 supplier_id INT NOT NULL,
 prod_imgurl VARCHAR(255),
@@ -133,10 +133,12 @@ CREATE TABLE order_detail (
 order_id INT NOT NULL,
 prod_id INT NOT NULL,
 qty INT NOT NULL,
-price FLOAT NOT NULL
+price FLOAT NOT NULL，
+STATUS VARCHAR(50) DEFAULT 'unfilled'
 );
 
 SELECT * FROM order_detail;
+
 
 DESC order_detail;
 

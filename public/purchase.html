@@ -173,53 +173,109 @@
         orders.forEach(order => {
             // 格式化日期
             const date = new Date(order.order_date);
-            const formattedDate = date.toLocaleDateString(); // 这里修改了日期格式
+            const formattedDate = date.toLocaleDateString();
+
+            // 确定订单状态
+            let orderStatus = 'unfilled';
+            let showCancelButton = true;
+            let showSignedButton = false;
+
+            // 检查订单中商品的状态
+            const itemStatuses = order.items.map(item => item.status);
+            if (itemStatuses.every(status => status === 'delivering')) {
+                orderStatus = 'delivering';
+                showCancelButton = false;
+                showSignedButton = true;
+            } else if (itemStatuses.some(status => status === 'delivering')) {
+                orderStatus = 'delivering';
+                showCancelButton = false;
+            } else {
+                orderStatus = 'unfilled';
+            }
+
             ordersHtml += `
-                    <div class="purchase-card">
-                        <div class="purchase-header">
-                            <h3>Order #${order.order_id}</h3>
-                            <span class="order-date">${formattedDate}</span>
-                             <button class="delete-order" data-order-id="${order.order_id}">Delete Order</button>
-                        </div>
-                        <div class="purchase-details">
-                            ${order.items.map(item => `
-                                <p>${item.name} × ${item.quantity}</p>
-                            `).join('')}
-                            <p class="order-total">Total: $${order.total.toFixed(2)}</p>
-                        </div>
-                    </div>
-                `;
+            <div class="purchase-card">
+                <div class="purchase-header">
+                    <h3>Order #${order.order_id}</h3>
+                    <span class="order-date">${formattedDate}</span>
+                    <span class="order-status">${orderStatus}</span>
+                    ${showCancelButton ? '<button class="cancel-order" data-order-id="${order.order_id}">Cancel Order</button>' : ''}
+                    ${showSignedButton ? '<button class="signed-order" data-order-id="${order.order_id}">Mark as Completed</button>' : ''}
+                </div>
+                <div class="purchase-details">
+                    ${order.items.map(item => `
+                        <p>${item.name} × ${item.quantity}</p>
+                    `).join('')}
+                    <p class="order-total">Total: $${order.total.toFixed(2)}</p>
+                </div>
+            </div>
+        `;
         });
+
         container.innerHTML = ordersHtml;
-        // 为删除按钮添加点击事件监听器
-        const deleteButtons = container.querySelectorAll('.delete-order');
-        deleteButtons.forEach(button => {
+
+        // 为取消按钮添加点击事件监听器
+        const cancelButtons = container.querySelectorAll('.cancel-order');
+        cancelButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const orderId = button.getAttribute('data-order-id');
-                deleteOrder(orderId);
+                cancelOrder(orderId);
+            });
+        });
+
+        // 为完成按钮添加点击事件监听器
+        const signedButtons = container.querySelectorAll('.signed-order');
+        signedButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const orderId = button.getAttribute('data-order-id');
+                markAsCompleted(orderId);
             });
         });
     }
-    // 删除订单
-    function deleteOrder(orderId) {
+
+    // 取消订单
+    function cancelOrder(orderId) {
         const username = localStorage.getItem('username');
 
-        fetch(`http://localhost:3000/api/deleteOrder?username=${username}&order_id=${orderId}`, {
-            method: 'DELETE'
+        fetch(`http://localhost:3000/api/cancelOrder?username=${username}&order_id=${orderId}`, {
+            method: 'PUT'
         })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Order deleted successfully');
+                    alert('Order canceled successfully');
                     // 重新加载订单列表
                     location.reload();
                 } else {
-                    alert('Failed to delete order: ' + data.message);
+                    alert('Failed to cancel order: ' + data.message);
                 }
             })
             .catch(error => {
-                console.error('Error deleting order:', error);
-                alert('Error deleting order. Check the console.');
+                console.error('Error canceling order:', error);
+                alert('Error canceling order. Check the console.');
+            });
+    }
+
+    // 标记订单为已完成
+    function markAsCompleted(orderId) {
+        const username = localStorage.getItem('username');
+
+        fetch(`http://localhost:3000/api/completeOrder?username=${username}&order_id=${orderId}`, {
+            method: 'PUT'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Order marked as completed successfully');
+                    // 重新加载订单列表
+                    location.reload();
+                } else {
+                    alert('Failed to mark order as completed: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error marking order as completed:', error);
+                alert('Error marking order as completed. Check the console.');
             });
     }
 </script>

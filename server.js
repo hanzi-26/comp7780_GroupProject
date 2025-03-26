@@ -553,8 +553,8 @@ app.get('/api/supplier/orders', (req, res) => {
                 so.order_date,
                 p.prod_desc,
                 od.qty,
-                od.price AS amount,
-                'Completed' AS status
+                od.price  AS amount,
+                od.status AS status
          FROM sales_order so
                   JOIN order_detail od ON so.order_id = od.order_id
                   JOIN product p ON od.prod_id = p.prod_id
@@ -567,6 +567,52 @@ app.get('/api/supplier/orders', (req, res) => {
                 return;
             }
             res.json(results);
+        }
+    );
+});
+
+// 更新订单详情状态接口
+app.put('/api/supplier/orders/:order_id/deliver', (req, res) => {
+    const orderId = req.params.order_id;
+    const prodDesc = req.body.prodDesc;
+
+    // 获取商品 ID
+    pool.query(
+        'SELECT p.prod_id FROM product p WHERE p.prod_desc = ?',
+        [prodDesc],
+        (err, results) => {
+            if (err) {
+                console.error('Error fetching product ID:', err);
+                res.status(500).json({success: false, message: 'Internal Server Error'});
+                return;
+            }
+
+            if (results.length === 0) {
+                res.json({success: false, message: 'Product not found'});
+                return;
+            }
+
+            const productId = results[0].prod_id;
+
+            // 更新订单详情状态
+            pool.query(
+                'UPDATE order_detail SET status = ? WHERE order_id = ? AND prod_id = ?',
+                ['delivering', orderId, productId],
+                (err, results) => {
+                    if (err) {
+                        console.error('Error updating order detail status:', err);
+                        res.status(500).json({success: false, message: 'Internal Server Error'});
+                        return;
+                    }
+
+                    if (results.affectedRows === 0) {
+                        res.json({success: false, message: 'No matching order detail found'});
+                        return;
+                    }
+
+                    res.json({success: true, message: 'Order detail status updated successfully'});
+                }
+            );
         }
     );
 });
