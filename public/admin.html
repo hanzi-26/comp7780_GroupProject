@@ -180,6 +180,27 @@
             border-bottom: 2px solid #6c7a89;
             padding-bottom: 0.5rem;
         }
+
+        .order-status {
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .order-status.completed {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .order-status.delivering {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .order-status.unfilled {
+            background-color: #F44336;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -361,7 +382,7 @@
             <td>${transaction.prod_desc}</td>
             <td>$${transaction.amount.toFixed(2)}</td>
             <td>${new Date(transaction.order_date).toLocaleDateString()}</td>
-            <td>${transaction.status}</td>
+            <td><span class="order-status ${transaction.status}">${transaction.status}</span></td>
             <td><button class="deliver-btn" data-order-id="${transaction.order_id}" data-prod-desc="${transaction.prod_desc}">Deliver</button></td>
         `;
                 container.appendChild(row);

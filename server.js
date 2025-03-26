@@ -153,7 +153,7 @@ app.post('/api/checkout', (req, res) => {
         // 扣除用户余额
         pool.query('UPDATE customer SET cust_credit_limit = cust_credit_limit - ? WHERE cust_username = ?', [totalCost, username], (err, results) => {
 
-            // 插入sale_order记录
+            // 插入sales_order记录
             pool.query('INSERT INTO sales_order (cust_username, order_date) VALUES (?, NOW())', [username], (err, results) => {
 
                 const order_id = results.insertId;
@@ -185,7 +185,7 @@ app.get('/api/getOrders', (req, res) => {
 
     // 获取用户的订单信息
     pool.query(
-        `SELECT so.order_id, so.order_date, od.prod_id, od.qty, p.prod_desc, p.prod_price
+        `SELECT so.order_id, so.order_date, od.prod_id, od.qty, p.prod_desc, p.prod_price, od.status
          FROM sales_order so
                   JOIN order_detail od ON so.order_id = od.order_id
                   JOIN product p ON od.prod_id = p.prod_id
@@ -215,7 +215,8 @@ app.get('/api/getOrders', (req, res) => {
                     name: row.prod_desc,
                     quantity: row.qty,
                     price: row.prod_price,
-                    total: row.prod_price * row.qty
+                    total: row.prod_price * row.qty,
+                    status: row.status
                 };
                 orders[orderId].items.push(item);
                 orders[orderId].total += item.total;
@@ -418,7 +419,7 @@ app.delete('/api/deleteOrder', (req, res) => {
                         return;
                     }
 
-                    // 删除 sale_order 中的记录
+                    // 删除 sales_order 中的记录
                     connection.query('DELETE FROM sales_order WHERE order_id = ?', [orderId], (err, results) => {
                         if (err) {
                             connection.rollback(() => {
@@ -615,6 +616,285 @@ app.put('/api/supplier/orders/:order_id/deliver', (req, res) => {
             );
         }
     );
+});
+
+// 取消订单接口
+app.put('/api/cancelOrder', (req, res) => {
+    const username = req.query.username;
+    const orderId = req.query.order_id;
+
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error('Error getting database connection:', err);
+            res.status(500).json({success: false, message: 'Internal Server Error'});
+            return;
+        }
+
+        connection.beginTransaction((err) => {
+            if (err) {
+                console.error('Error starting transaction:', err);
+                res.status(500).json({success: false, message: 'Internal Server Error'});
+                connection.release();
+                return;
+            }
+
+            // 检查订单是否存在且属于当前用户
+            connection.query('SELECT * FROM sales_order WHERE order_id = ? AND cust_username = ?', [orderId, username], (err, results) => {
+                if (err) {
+                    connection.rollback(() => {
+                        console.error('Error checking order ownership:', err);
+                        res.status(500).json({success: false, message: 'Internal Server Error'});
+                    });
+                    connection.release();
+                    return;
+                }
+
+                if (results.length === 0) {
+                    connection.rollback(() => {
+                        res.status(404).json({success: false, message: 'Order not found or does not belong to you'});
+                    });
+                    connection.release();
+                    return;
+                }
+
+                // 获取订单详情
+                connection.query('SELECT * FROM order_detail WHERE order_id = ?', [orderId], (err, orderDetails) => {
+                    if (err) {
+                        connection.rollback(() => {
+                            console.error('Error fetching order details:', err);
+                            res.status(500).json({success: false, message: 'Internal Server Error'});
+                        });
+                        connection.release();
+                        return;
+                    }
+
+                    // 删除订单详情
+                    connection.query('DELETE FROM order_detail WHERE order_id = ?', [orderId], (err) => {
+                        if (err) {
+                            connection.rollback(() => {
+                                console.error('Error deleting order details:', err);
+                                res.status(500).json({success: false, message: 'Internal Server Error'});
+                            });
+                            connection.release();
+                            return;
+                        }
+
+                        // 删除订单
+                        connection.query('DELETE FROM sales_order WHERE order_id = ?', [orderId], (err) => {
+                            if (err) {
+                                connection.rollback(() => {
+                                    console.error('Error deleting order:', err);
+                                    res.status(500).json({success: false, message: 'Internal Server Error'});
+                                });
+                                connection.release();
+                                return;
+                            }
+
+                            // 恢复商品库存
+                            orderDetails.forEach(detail => {
+                                connection.query('UPDATE product SET qty = qty + ? WHERE product_id = ?', [detail.quantity, detail.product_id]);
+                            });
+
+                            // 恢复用户余额
+                            connection.query('SELECT SUM(price * qty) AS total_cost FROM order_detail WHERE order_id = ?', [orderId], (err, results) => {
+                                if (err) {
+                                    connection.rollback(() => {
+                                        console.error('Error fetching order total cost:', err);
+                                        res.status(500).json({success: false, message: 'Internal Server Error'});
+                                    });
+                                    connection.release();
+                                    return;
+                                }
+
+                                const totalCost = results[0].total_cost || 0;
+                                connection.query('UPDATE customer SET cust_credit_limit = cust_credit_limit + ? WHERE cust_username = ?', [totalCost, username], (err) => {
+                                    if (err) {
+                                        connection.rollback(() => {
+                                            console.error('Error updating customer credit limit:', err);
+                                            res.status(500).json({success: false, message: 'Internal Server Error'});
+                                        });
+                                        connection.release();
+                                        return;
+                                    }
+
+                                    connection.commit((err) => {
+                                        if (err) {
+                                            connection.rollback(() => {
+                                                console.error('Error committing transaction:', err);
+                                                res.status(500).json({
+                                                    success: false,
+                                                    message: 'Internal Server Error'
+                                                });
+                                            });
+                                            connection.release();
+                                            return;
+                                        }
+
+                                        res.json({success: true, message: 'Order canceled and deleted successfully'});
+                                        connection.release();
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+// 标记订单为已完成接口
+app.put('/api/completeOrder', (req, res) => {
+    const username = req.query.username;
+    const orderId = req.query.order_id;
+
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error('Error getting database connection:', err);
+            res.status(500).json({success: false, message: 'Internal Server Error'});
+            return;
+        }
+
+        connection.beginTransaction((err) => {
+            if (err) {
+                console.error('Error starting transaction:', err);
+                res.status(500).json({success: false, message: 'Internal Server Error'});
+                connection.release();
+                return;
+            }
+
+            // 检查订单是否存在且属于当前用户
+            connection.query('SELECT * FROM sales_order WHERE order_id = ? AND cust_username = ?', [orderId, username], (err, results) => {
+                if (err) {
+                    connection.rollback(() => {
+                        console.error('Error checking order ownership:', err);
+                        res.status(500).json({success: false, message: 'Internal Server Error'});
+                    });
+                    connection.release();
+                    return;
+                }
+
+                if (results.length === 0) {
+                    connection.rollback(() => {
+                        res.status(404).json({success: false, message: 'Order not found or does not belong to you'});
+                    });
+                    connection.release();
+                    return;
+                }
+
+                // 更新订单详情状态
+                connection.query('UPDATE order_detail SET status = ? WHERE order_id = ?', ['completed', orderId], (err) => {
+                    if (err) {
+                        connection.rollback(() => {
+                            console.error('Error updating order detail status:', err);
+                            res.status(500).json({success: false, message: 'Internal Server Error'});
+                        });
+                        connection.release();
+                        return;
+                    }
+
+                    connection.commit((err) => {
+                        if (err) {
+                            connection.rollback(() => {
+                                console.error('Error committing transaction:', err);
+                                res.status(500).json({success: false, message: 'Internal Server Error'});
+                            });
+                            connection.release();
+                            return;
+                        }
+
+                        res.json({success: true, message: 'Order marked as completed successfully'});
+                        connection.release();
+                    });
+                });
+            });
+        });
+    });
+});
+
+// 删除订单接口
+app.delete('/api/deleteOrder', (req, res) => {
+    const username = req.query.username;
+    const orderId = req.query.order_id;
+
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.error('Error getting database connection:', err);
+            res.status(500).json({success: false, message: 'Internal Server Error'});
+            return;
+        }
+
+        connection.beginTransaction((err) => {
+            if (err) {
+                console.error('Error starting transaction:', err);
+                res.status(500).json({success: false, message: 'Internal Server Error'});
+                connection.release();
+                return;
+            }
+
+            // 检查订单是否存在且属于当前用户，并且状态为 completed
+            connection.query(
+                'SELECT * FROM sales_order WHERE order_id = ? AND cust_username = ? AND status = ?',
+                [orderId, username, 'completed'],
+                (err, results) => {
+                    if (err) {
+                        connection.rollback(() => {
+                            console.error('Error checking order ownership and status:', err);
+                            res.status(500).json({success: false, message: 'Internal Server Error'});
+                        });
+                        connection.release();
+                        return;
+                    }
+
+                    if (results.length === 0) {
+                        connection.rollback(() => {
+                            res.status(404).json({success: false, message: 'Order not found or not completed'});
+                        });
+                        connection.release();
+                        return;
+                    }
+
+                    // 删除订单详情
+                    connection.query('DELETE FROM order_detail WHERE order_id = ?', [orderId], (err) => {
+                        if (err) {
+                            connection.rollback(() => {
+                                console.error('Error deleting order details:', err);
+                                res.status(500).json({success: false, message: 'Internal Server Error'});
+                            });
+                            connection.release();
+                            return;
+                        }
+
+                        // 删除订单
+                        connection.query('DELETE FROM sales_order WHERE order_id = ?', [orderId], (err) => {
+                            if (err) {
+                                connection.rollback(() => {
+                                    console.error('Error deleting order:', err);
+                                    res.status(500).json({success: false, message: 'Internal Server Error'});
+                                });
+                                connection.release();
+                                return;
+                            }
+
+                            connection.commit((err) => {
+                                if (err) {
+                                    connection.rollback(() => {
+                                        console.error('Error committing transaction:', err);
+                                        res.status(500).json({success: false, message: 'Internal Server Error'});
+                                    });
+                                    connection.release();
+                                    return;
+                                }
+
+                                res.json({success: true, message: 'Order deleted successfully'});
+                                connection.release();
+                            });
+                        });
+                    });
+                }
+            );
+        });
+    });
 });
 
 // 添加一个简单的首页路由

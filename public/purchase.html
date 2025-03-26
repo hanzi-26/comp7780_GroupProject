@@ -46,7 +46,7 @@
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .purchase-header {
@@ -57,7 +57,7 @@
             justify-content: space-between;
         }
 
-        .logout-button{
+        .logout-button {
             position: absolute;
             top: 20px;
             right: 20px;
@@ -76,6 +76,118 @@
         .logout-button:hover {
             background-color: #5a6673;
             transform: translateY(-1px);
+        }
+
+        .purchase-details {
+            margin-top: 10px;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .item-name {
+            flex: 1;
+            text-align: left;
+        }
+
+        .item-quantity {
+            margin: 0 10px;
+        }
+
+        .item-status {
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .item-status.completed {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .item-status.delivering {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .item-status.unfilled {
+            background-color: #F44336;
+            color: white;
+        }
+
+        .order-status {
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .order-status.completed {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .order-status.delivering {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .order-status.unfilled {
+            background-color: #F44336;
+            color: white;
+        }
+
+        .order-total {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        /* 按钮样式 */
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        /* 取消订单按钮 - 红色 */
+        .cancel-order {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .cancel-order:hover {
+            background-color: #d32f2f;
+        }
+
+        /* 标记为完成按钮 - 绿色 */
+        .signed-order {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .signed-order:hover {
+            background-color: #388e3c;
+        }
+
+        /* 删除订单按钮 - 灰色 */
+        .delete-order {
+            background-color: #9e9e9e;
+            color: white;
+        }
+
+        .delete-order:hover {
+            background-color: #757575;
+        }
+
+        /* 按钮焦点状态 */
+        button:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
@@ -107,7 +219,8 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h4>About Us</h4>
-                <p>Morandi Living is committed to providing you with high-quality home products, making every home full of warmth and artistic atmosphere.</p >
+                <p>Morandi Living is committed to providing you with high-quality home products, making every home full
+                    of warmth and artistic atmosphere.</p>
             </div>
             <div class="footer-section">
                 <h4>Quick Links</h4>
@@ -119,7 +232,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 COMP7780. All rights reserved.</p >
+            <p>&copy; 2025 COMP7780. All rights reserved.</p>
         </div>
     </div>
 </footer>
@@ -179,6 +292,8 @@
             let orderStatus = 'unfilled';
             let showCancelButton = true;
             let showSignedButton = false;
+            let showDeleteButton = false;
+            let showHoldButton = false;
 
             // 检查订单中商品的状态
             const itemStatuses = order.items.map(item => item.status);
@@ -186,9 +301,17 @@
                 orderStatus = 'delivering';
                 showCancelButton = false;
                 showSignedButton = true;
+                showDeleteButton = false;
             } else if (itemStatuses.some(status => status === 'delivering')) {
                 orderStatus = 'delivering';
                 showCancelButton = false;
+                showDeleteButton = false;
+                showHoldButton = true;
+            } else if (itemStatuses.every(status => status === 'completed')) {
+                orderStatus = 'completed';
+                showCancelButton = false;
+                showSignedButton = false;
+                showDeleteButton = true;
             } else {
                 orderStatus = 'unfilled';
             }
@@ -198,13 +321,15 @@
                 <div class="purchase-header">
                     <h3>Order #${order.order_id}</h3>
                     <span class="order-date">${formattedDate}</span>
-                    <span class="order-status">${orderStatus}</span>
-                    ${showCancelButton ? '<button class="cancel-order" data-order-id="${order.order_id}">Cancel Order</button>' : ''}
-                    ${showSignedButton ? '<button class="signed-order" data-order-id="${order.order_id}">Mark as Completed</button>' : ''}
+                    <h3>Order Status: <span class="order-status ${orderStatus}">${orderStatus}</span></h3>
+                    ${showCancelButton ? `<button class="cancel-order" data-order-id="${order.order_id}">Cancel Order</button>` : ''}
+                    ${showSignedButton ? `<button class="signed-order" data-order-id="${order.order_id}">Signed</button>` : ''}
+                    ${showDeleteButton ? `<button class="delete-order" data-order-id="${order.order_id}">Delete Order</button>` : ''}
+                    ${showHoldButton ? `<button class="hold-btn">Waiting</button>` : ''}
                 </div>
                 <div class="purchase-details">
                     ${order.items.map(item => `
-                        <p>${item.name} × ${item.quantity}</p>
+                        <p>${item.name} × ${item.quantity} <span class="item-status ${item.status}">(${item.status})</span></p>
                     `).join('')}
                     <p class="order-total">Total: $${order.total.toFixed(2)}</p>
                 </div>
@@ -229,6 +354,15 @@
             button.addEventListener('click', () => {
                 const orderId = button.getAttribute('data-order-id');
                 markAsCompleted(orderId);
+            });
+        });
+
+        // 为删除按钮添加点击事件监听器
+        const deleteButtons = container.querySelectorAll('.delete-order');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const orderId = button.getAttribute('data-order-id');
+                deleteOrder(orderId);
             });
         });
     }
@@ -276,6 +410,29 @@
             .catch(error => {
                 console.error('Error marking order as completed:', error);
                 alert('Error marking order as completed. Check the console.');
+            });
+    }
+
+    // 删除订单
+    function deleteOrder(orderId) {
+        const username = localStorage.getItem('username');
+
+        fetch(`http://localhost:3000/api/deleteOrder?username=${username}&order_id=${orderId}`, {
+            method: 'DELETE'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Order deleted successfully');
+                    // 重新加载订单列表
+                    location.reload();
+                } else {
+                    alert('Failed to delete order: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting order:', error);
+                alert('Error deleting order. Check the console.');
             });
     }
 </script>
