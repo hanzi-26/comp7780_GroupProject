@@ -67,7 +67,6 @@ prod_price DECIMAL(10, 2)
 
 SELECT * FROM product;
 
-
 DESC product;
 
 SELECT * FROM product

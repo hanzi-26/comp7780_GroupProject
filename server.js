@@ -163,7 +163,7 @@ app.post('/api/checkout', (req, res) => {
                     productUpdates.push(
                         pool.query('INSERT INTO order_detail (order_id, prod_id, qty, price) VALUES (?, ?, ?, ?)', [order_id, item.product_id, item.quantity, item.price])
                     );
-                    pool.query('UPDATE product SET prod_on_hand = prod_on_hand - ? WHERE id = ?', [item.quantity, item.product_id]);
+                    pool.query('UPDATE product SET prod_on_hand = prod_on_hand - ? WHERE prod_id = ?', [item.quantity, item.product_id]);
                 }
 
                 Promise.all(productUpdates)

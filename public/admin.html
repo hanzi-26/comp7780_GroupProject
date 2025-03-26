@@ -468,7 +468,8 @@
                 .then(data => {
                     if (data.success) {
                         alert('Product updated successfully!');
-                        document.querySelector('.add-product-form').reset();
+                        // document.querySelector('.add-product-form').reset();
+                        location.reload();
                         const updateButton = document.getElementById('updateProductBtn');
                         if (updateButton) {
                             updateButton.remove();
