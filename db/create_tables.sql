@@ -1,16 +1,16 @@
-DROP DATABASE comp7780_GroupProject;
+DROP DATABASE IF EXISTS comp7780_GroupProject;
 
 CREATE DATABASE comp7780_GroupProject;
 
 USE comp7780_GroupProject;
 
 # employee
-DROP TABLE employee;
+DROP TABLE IF EXISTS employee;
 
 CREATE TABLE employee (
 empl_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-empl_name VARCHAR(20) NOT NULL,
-empl_email VARCHAR(20) NOT NULL,
+empl_name VARCHAR(50) NOT NULL,
+empl_email VARCHAR(50) NOT NULL,
 empl_phone VARCHAR(12),
 empl_hire_date DATE,
 empl_salary FLOAT NOT NULL,
@@ -30,14 +30,14 @@ INSERT INTO employee VALUES (NULL, 'Yifan LI', 'empl2@abc.com', '415-234-5678', 
 INSERT INTO employee VALUES (NULL, 'SHiwei DENG', 'empl3@abc.com', '415-345-6789', '2021-02-01', 5000, 'Developer', 24448028);
 
 # customers
-DROP TABLE customer;
+DROP TABLE IF EXISTS customer;
 
 CREATE TABLE customer (
 cust_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 cust_username VARCHAR(20) NOT NULL,
 cust_password VARCHAR(64),
-cust_email VARCHAR(20) NOT NULL,
-cust_name VARCHAR(20) NOT NULL,
+cust_email VARCHAR(50) NOT NULL,
+cust_name VARCHAR(50) NOT NULL,
 cust_phone VARCHAR(12),
 cust_credit_limit FLOAT NOT NULL
 );
@@ -53,7 +53,7 @@ INSERT INTO customer VALUES (NULL, 'cust1', NULL, 'cust1@xyz.com', 'Cust1', '415
 
 
 # products 
-DROP TABLE product;
+DROP TABLE IF EXISTS product;
 
 CREATE TABLE product (
 prod_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -78,42 +78,27 @@ INSERT INTO product VALUES (NULL, 'Bed Sheet Set', 8, 2, 'https://images.unsplas
 INSERT INTO product VALUES (NULL, 'Floor Lamp', 12, 1, 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80', 'Lighting', 799);
 INSERT INTO product VALUES (NULL, 'Storage Cabinet', 8, 2, 'https://www.stockroom.com.hk/media/catalog/product/cache/11/image/16121aaca399c35451ffd7c398a3f1cd/e/r/ermina_rattan_shoe_cabinet_2__1_1.jpg', 'Storage', 1299);
 
-SELECT * FROM product WHERE prod_desc LIKE '%sofa%';
 # suppliers
-DROP TABLE supplier;
+DROP TABLE IF EXISTS supplier;
 
 CREATE TABLE supplier (
 supplier_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 supplier_name VARCHAR(20) NOT NULL,
 supplier_email VARCHAR(20) NOT NULL,
 feedback_score INT,
-supplier_location VARCHAR(20) NOT NULL
+supplier_location VARCHAR(20) NOT NULL,
+supplier_password INT
 );
 
 SELECT * FROM supplier;
 
 DESC supplier;
 
-INSERT INTO supplier VALUES (NULL, 'Supplier1', 'supplier1@aaa.com', 4, 'HKBU');
-INSERT INTO supplier VALUES (NULL, 'Supplier2', 'supplier2@bbb.com', 4.5, 'CHINA');
-
-# cart
-DROP TABLE cart;
-
-CREATE TABLE cart (
-cust_username VARCHAR(20) NOT NULL,
-cart_order_date DATE,
-prod_id INT NOT NULL,
-cart_qty INT NOT NULL,
-cart_price FLOAT NOT NULL
-);
-
-SELECT * FROM cart;
-
-DESC cart;
+INSERT INTO supplier VALUES (NULL, 'Supplier1', 'supplier1@aaa.com', 4, 'HKBU', 123);
+INSERT INTO supplier VALUES (NULL, 'Supplier2', 'supplier2@bbb.com', 4.5, 'CHINA', 123);
 
 # sales_order
-DROP TABLE sales_order;
+DROP TABLE IF EXISTS sales_order;
 
 CREATE TABLE sales_order (
 order_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -122,12 +107,11 @@ order_date DATE
 );
 
 SELECT * FROM sales_order;
-INSERT INTO sales_order (cust_username, order_date) VALUES ('test_user', NOW());
 
 DESC sales_order;
 
 # order_detail
-DROP TABLE order_detail;
+DROP TABLE IF EXISTS order_detail;
 
 CREATE TABLE order_detail (
 order_id INT NOT NULL,
@@ -139,24 +123,4 @@ STATUS VARCHAR(50) DEFAULT 'unfilled'
 
 SELECT * FROM order_detail;
 
-
 DESC order_detail;
-
-###################################
-### po: po_num, po_date, prod_id, supplier_id 
-###
-###################################
-
-DROP TABLE po;
-
-CREATE TABLE po (
-po_num INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-po_date DATE,
-prod_id INT NOT NULL,
-supplier_id INT NOT NULL
-);
-
-#################################
-### create warehouse: pick_list, invoice tables
-### 
-#################################
