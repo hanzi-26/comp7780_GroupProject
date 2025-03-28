@@ -52,7 +52,7 @@ INSERT INTO customer VALUES (NULL, 'cust1', NULL, 'cust1@xyz.com', 'Cust1', '415
 (NULL, 'cust4', NULL, 'cust4@xyz.com', 'Cust4', '415-456-7890', 5000);
 
 
-# products 
+# products
 DROP TABLE IF EXISTS product;
 
 CREATE TABLE product (
@@ -117,7 +117,7 @@ CREATE TABLE order_detail (
 order_id INT NOT NULL,
 prod_id INT NOT NULL,
 qty INT NOT NULL,
-price FLOAT NOT NULL，
+price FLOAT NOT NULL,
 STATUS VARCHAR(50) DEFAULT 'unfilled'
 );
 
