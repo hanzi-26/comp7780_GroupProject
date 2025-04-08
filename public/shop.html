@@ -63,6 +63,8 @@
         cursor: pointer;
     }
 </style>
+<!-- PayPal SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id=ASCNAnHRxWmwrzoto-oi5ugOHX1DF6c1Who_eR0No6aaiGa91VPcsYY05AfhFWlOdzrpkMtOKMKWsljD"></script>
 <body>
 <nav class="navbar">
     <div class="container">
@@ -101,6 +103,15 @@
             <div class="cart-total">
                 Total: <span id="cartTotal">$0</span>
             </div>
+            <div class="payment-method">
+                <label>
+                    <input type="radio" name="paymentMethod" value="balance" checked> Balance
+                </label>
+                <label>
+                    <input type="radio" name="paymentMethod" value="paypal"> PayPal
+                </label>
+            </div>
+            <div id="paypal-button-container"></div>
             <button id="checkoutButton" class="checkout-btn">Checkout</button>
         </div>
     </div>

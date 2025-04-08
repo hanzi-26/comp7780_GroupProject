@@ -179,6 +179,40 @@ app.post('/api/checkout', (req, res) => {
     });
 });
 
+app.post('/api/paypalCheckout', (req, res) => {
+    const username = req.body.username;
+    const cartItems = req.body.cartItems;
+    const totalCost = req.body.totalCost;
+
+    // 插入 sales_order 记录
+    pool.query('INSERT INTO sales_order (cust_username, order_date) VALUES (?, NOW())', [username], (err, results) => {
+        if (err) {
+            console.error('Error inserting sales order:', err);
+            res.status(500).json({ success: false, message: 'Internal Server Error' });
+            return;
+        }
+
+        const order_id = results.insertId;
+        // 插入 order_detail 记录并更新 product 库存
+        const productUpdates = [];
+        for (const item of cartItems) {
+            productUpdates.push(
+                pool.query('INSERT INTO order_detail (order_id, prod_id, qty, price) VALUES (?, ?, ?, ?)', [order_id, item.product_id, item.quantity, item.price])
+            );
+            pool.query('UPDATE product SET prod_on_hand = prod_on_hand - ? WHERE prod_id = ?', [item.quantity, item.product_id]);
+        }
+
+        Promise.all(productUpdates)
+            .then(() => {
+                res.json({ success: true, message: 'PayPal Checkout successful' });
+            })
+            .catch(err => {
+                console.error('Error processing product updates:', err);
+                res.status(500).json({ success: false, message: 'Internal Server Error' });
+            });
+    });
+});
+
 // 获取账户余额接口
 app.get('/api/getBalance', (req, res) => {
     const username = req.query.username;

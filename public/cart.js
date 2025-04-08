@@ -122,8 +122,55 @@ function updateCart() {
         </div>
     `).join('');
 }
+// document.addEventListener('DOMContentLoaded', () => {
+//     const checkoutButton = document.getElementById('checkoutButton');
+//     // checkout按钮点击事件
+//     checkoutButton.addEventListener('click', () => {
+//         // 获取购物车中的商品信息
+//         const cartItems = cart.map(item => ({
+//             product_id: item.id,
+//             quantity: item.quantity,
+//             price: item.price
+//         }));
+//
+//         console.log("cart", cartItems)
+//
+//         // 获取当前用户信息
+//         const username = localStorage.getItem('username');
+//
+//         // 调用后端的checkout API
+//         fetch('http://localhost:3000/api/checkout', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify({
+//                 username,
+//                 cartItems
+//             }),
+//         })
+//             .then(response => response.json())
+//             .then(data => {
+//                 if (data.success) {
+//                     // 清空购物车
+//                     cart = [];
+//                     updateCart();
+//                     alert('Checkout successful!');
+//                 } else {
+//                     alert('Checkout failed: ' + data.message);
+//                 }
+//             })
+//             .catch(error => {
+//                 console.error('Error during checkout:', error);
+//                 alert('Error during checkout. Check the console.');
+//             });
+//     });
+// });
+
 document.addEventListener('DOMContentLoaded', () => {
     const checkoutButton = document.getElementById('checkoutButton');
+    const paymentMethodRadios = document.querySelectorAll('input[name="paymentMethod"]');
+
     // checkout按钮点击事件
     checkoutButton.addEventListener('click', () => {
         // 获取购物车中的商品信息
@@ -133,36 +180,98 @@ document.addEventListener('DOMContentLoaded', () => {
             price: item.price
         }));
 
-        console.log("cart", cartItems)
+        console.log("cart", cartItems);
 
         // 获取当前用户信息
         const username = localStorage.getItem('username');
 
-        // 调用后端的checkout API
-        fetch('http://localhost:3000/api/checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username,
-                cartItems
-            }),
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // 清空购物车
-                    cart = [];
-                    updateCart();
-                    alert('Checkout successful!');
-                } else {
-                    alert('Checkout failed: ' + data.message);
-                }
+        // 获取选中的支付方式
+        let selectedPaymentMethod = 'balance';
+        paymentMethodRadios.forEach(radio => {
+            if (radio.checked) {
+                selectedPaymentMethod = radio.value;
+            }
+        });
+
+        if (selectedPaymentMethod === 'balance') {
+            // 调用原有的余额支付接口
+            fetch('http://localhost:3000/api/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username,
+                    cartItems
+                }),
             })
-            .catch(error => {
-                console.error('Error during checkout:', error);
-                alert('Error during checkout. Check the console.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 清空购物车
+                        cart = [];
+                        updateCart();
+                        alert('Checkout successful!');
+                    } else {
+                        alert('Checkout failed: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during checkout:', error);
+                    alert('Error during checkout. Check the console.');
+                });
+        } else if (selectedPaymentMethod === 'paypal') {
+            // 计算总价
+            let totalCost = 0;
+            for (const item of cartItems) {
+                totalCost += item.price * item.quantity;
+            }
+
+            // 初始化 PayPal 按钮
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: totalCost
+                            }
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        alert('Transaction completed by ' + details.payer.name.given_name + '!');
+
+                        // 调用后端的 PayPal 支付接口
+                        fetch('http://localhost:3000/api/paypalCheckout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                username,
+                                cartItems,
+                                totalCost
+                            }),
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // 清空购物车
+                                    cart = [];
+                                    updateCart();
+                                    alert('PayPal Checkout successful!');
+                                } else {
+                                    alert('PayPal Checkout failed: ' + data.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error during PayPal checkout:', error);
+                                alert('Error during PayPal checkout. Check the console.');
+                            });
+                    });
+                }
+            }).render('#paypal-button-container');
+        }
     });
 });
