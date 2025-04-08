@@ -24,3 +24,9 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root
 node server.js
 
 ### copy the given url in the terminal to Chrome, you will get the program.
+
+### when using PayPal to checkout the following information can be used
+
+Account: sb-t15j639716408@personal.example.com
+
+Password: Y<!E!8Cu

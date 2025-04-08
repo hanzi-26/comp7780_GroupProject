@@ -142,7 +142,7 @@ app.post('/api/checkout', (req, res) => {
         // 计算总价
         let totalCost = 0;
         for (const item of cartItems) {
-            totalCost += item.price * item.quantity;
+            totalCost += item.price * item.qty;
         }
 
         if (creditLimit < totalCost) {
