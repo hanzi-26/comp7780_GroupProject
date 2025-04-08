@@ -179,6 +179,43 @@ app.post('/api/checkout', (req, res) => {
     });
 });
 
+// 获取账户余额接口
+app.get('/api/getBalance', (req, res) => {
+    const username = req.query.username;
+
+    pool.query('SELECT cust_credit_limit FROM customer WHERE cust_username = ?', [username], (err, results) => {
+        if (err) {
+            console.error('Error fetching balance:', err);
+            res.status(500).json({ success: false, message: 'Internal Server Error' });
+            return;
+        }
+
+        if (results.length === 0) {
+            res.status(404).json({ success: false, message: 'User not found' });
+            return;
+        }
+
+        res.json({ success: true, balance: results[0].cust_credit_limit });
+    });
+});
+
+// PayPal充值接口
+app.post('/api/recharge', (req, res) => {
+    const { amount, username } = req.body;
+
+    // 更新用户余额
+    pool.query('UPDATE customer SET cust_credit_limit = cust_credit_limit + ? WHERE cust_username = ?',
+        [amount, username], (err, results) => {
+            if (err) {
+                console.error('Error updating customer credit limit:', err);
+                res.status(500).json({ success: false, message: 'Internal Server Error' });
+                return;
+            }
+
+            res.json({ success: true, message: 'Recharge successful' });
+        });
+});
+
 // 获取订单接口
 app.get('/api/getOrders', (req, res) => {
     const username = req.query.username;

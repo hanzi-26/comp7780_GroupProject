@@ -190,6 +190,102 @@
             outline: none;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
         }
+
+        /* 余额部件样式 */
+        .balance-widget {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .balance-widget:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .balance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .balance-header h2 {
+            font-size: 1.2rem;
+            color: #333;
+            margin: 0;
+        }
+
+        .balance-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin: 15px 0;
+            text-align: center;
+            background-color: #f8f8f8;
+            padding: 10px 15px;
+            border-radius: 6px;
+        }
+
+        .balance-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: center;
+        }
+
+        .balance-actions input {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .balance-actions input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        .balance-actions button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .balance-actions button:hover {
+            background-color: #388e3c;
+        }
+
+        .balance-toggle {
+            background-color: #6c7a89;
+            color: white;
+        }
+
+        .balance-toggle:hover {
+            background-color: #5a6673;
+        }
+
+        .recharge-btn {
+            background-color: #4CAF50;
+        }
+
+        .recharge-btn:hover {
+            background-color: #388e3c;
+        }
     </style>
 </head>
 <body>
@@ -207,6 +303,21 @@
         <button id="logoutButton" class="logout-button">Logout</button>
     </div>
 </nav>
+
+<!-- PayPal SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id=ASCNAnHRxWmwrzoto-oi5ugOHX1DF6c1Who_eR0No6aaiGa91VPcsYY05AfhFWlOdzrpkMtOKMKWsljD"></script>
+<!-- 余额部件 -->
+<div class="balance-widget">
+    <div class="balance-header">
+        <h2>Account Balance</h2>
+        <button id="toggleBalance" class="balance-toggle">Hide Balance</button>
+    </div>
+    <div id="balanceAmount" class="balance-amount">$0.00</div>
+    <div class="balance-actions">
+        <input type="number" id="rechargeAmount" placeholder="Enter amount" min="1" step="0.01">
+        <div id="paypal-button-container"></div>
+    </div>
+</div>
 
 <main class="container">
     <h2 class="section-title">My Purchase History</h2>
@@ -238,6 +349,122 @@
     </div>
 </footer>
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 检查是否已经登录
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const purchasesList = document.getElementById('purchasesList');
+        const logoutButton = document.getElementById('logoutButton');
+        const toggleBalanceButton = document.getElementById('toggleBalance');
+        const balanceAmount = document.getElementById('balanceAmount');
+        const rechargeBtn = document.getElementById('rechargeBtn');
+        const rechargeAmount = document.getElementById('rechargeAmount');
+
+        // 退出登录按钮点击事件
+        logoutButton.addEventListener('click', () => {
+            // 清除登录状态和用户信息
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            localStorage.removeItem('name');
+            // 跳转到登录页面
+            window.location.href = 'login.html';
+        });
+
+        // 切换余额显示
+        let balanceVisible = true;
+        toggleBalanceButton.addEventListener('click', () => {
+            balanceVisible = !balanceVisible;
+            if (balanceVisible) {
+                balanceAmount.style.display = 'block';
+                toggleBalanceButton.textContent = 'Hide Balance';
+            } else {
+                balanceAmount.style.display = 'none';
+                toggleBalanceButton.textContent = 'Show Balance';
+            }
+        });
+
+        // 获取账户余额
+        const username = localStorage.getItem('username');
+        fetch(`http://localhost:3000/api/getBalance?username=${username}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    balanceAmount.textContent = `$${data.balance.toFixed(2)}`;
+                } else {
+                    alert('Failed to fetch balance: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching balance:', error);
+                alert('Error fetching balance. Check the console.');
+            });
+
+        // PayPal充值功能
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                // 确保充值金额是有效的
+                if (!rechargeAmount.value || rechargeAmount.value <= 0) {
+                    alert('Please enter a valid amount');
+                    return null;
+                }
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: rechargeAmount.value
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    alert('Transaction completed by ' + details.payer.name.given_name + '!');
+
+                    // 调用后端API更新余额
+                    fetch(`http://localhost:3000/api/recharge`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            amount: parseFloat(rechargeAmount.value)
+                        }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Balance recharged successfully!');
+                                // 更新余额显示
+                                const newBalance = parseFloat(balanceAmount.textContent.slice(1)) + parseFloat(rechargeAmount.value);
+                                balanceAmount.textContent = `$${newBalance.toFixed(2)}`;
+                                rechargeAmount.value = '';
+                            } else {
+                                alert('Failed to recharge balance: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error recharging balance:', error);
+                            alert('Error recharging balance. Check the console.');
+                        });
+                });
+            }
+        }).render('#paypal-button-container'); // 渲染到容器中
+
+        // 获取当前用户信息
+        fetch(`http://localhost:3000/api/getOrders?username=${username}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Orders:', data);
+                displayOrders(data, purchasesList);
+            })
+            .catch(error => {
+                console.error('Error fetching orders:', error);
+                alert('Error fetching orders. Check the console.');
+            });
+    });
     document.addEventListener('DOMContentLoaded', () => {
         // 检查是否已经登录
         if (localStorage.getItem('isLoggedIn') !== 'true') {
